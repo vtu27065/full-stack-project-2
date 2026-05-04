@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: head"></head>
+<body class="bg-gray-50">
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">All Events</h1>
+        <p class="text-gray-600">Browse and register for upcoming campus events</p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+        <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div th:each="event : ${events}" class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+            <div class="gradient-bg h-2"></div>
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold" th:text="${event.eventType}">Workshop</span>
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-users mr-1"></i>
+                        <span th:text="${event.currentRegistrations} + '/' + (${event.maxCapacity} != null ? ${event.maxCapacity} : 'Unlimited')">0/100</span>
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2" th:text="${event.name}">Event Name</h3>
+                <p class="text-gray-600 mb-4" th:text="${event.description}">Description</p>
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-calendar mr-2 text-primary"></i>
+                        <!-- FIXED: Removed #dates.format, just display the date directly -->
+                        <span th:text="${#temporals.format(event.eventDateTime, 'MMM dd, yyyy')}"></span>
+                        <span class="mx-1">at</span>
+                        <span th:text="${#temporals.format(event.eventDateTime, 'hh:mm a')}"></span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                        <span th:text="${event.location}">Location</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                        <i class="fas fa-building mr-2 text-primary"></i>
+                        <span th:text="${event.department}">Department</span>
+                    </div>
+                </div>
+
+                <!-- Register button -->
+                <form th:action="@{/students/register-event/{id}(id=${event.id})}" method="post">
+                    <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition">
+                        Register Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${events.empty}" class="text-center py-12">
+        <p class="text-gray-500">No events available at the moment. Please check back later.</p>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

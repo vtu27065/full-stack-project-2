@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chatbot-toggle i {
+            font-size: 28px;
+            color: white;
+        }
+        .chatbot-window {
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chatbot-window.open {
+            display: flex;
+        }
+        .chatbot-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .user-message {
+            align-items: flex-end;
+        }
+        .bot-message {
+            align-items: flex-start;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+        }
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+        .bot-message .message-bubble {
+            background: white;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .chatbot-input {
+            padding: 12px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            background: white;
+        }
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 25px;
+            outline: none;
+        }
+        .chatbot-input button {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Chatbot Test Page</h1>
+        <p class="text-gray-600">The chatbot icon should appear at the bottom right corner of this page.</p>
+        <p class="text-gray-600 mt-2">If you see the chat icon, click it to test the chatbot.</p>
+    </div>
+</div>
+
+<!-- Chatbot Widget -->
+<div class="chatbot-container">
+    <div class="chatbot-toggle" onclick="toggleChatbot()">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <h3><i class="fas fa-robot"></i> Campus Assistant</h3>
+            <span style="cursor:pointer; font-size:24px;" onclick="toggleChatbot()">&times;</span>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-bubble">
+                    👋 Hello! I'm your Campus Assistant. How can I help you?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleChatbot() {
+        const window = document.getElementById('chatbotWindow');
+        window.classList.toggle('open');
+        if (window.classList.contains('open')) {
+            document.getElementById('chatbotInput').focus();
+        }
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chatbotInput');
+        const message = input.value.trim();
+        if (message === '') return;
+
+        addMessage(message, 'user');
+        input.value = '';
+
+        setTimeout(() => {
+            let response = getResponse(message);
+            addMessage(response, 'bot');
+        }, 500);
+    }
+
+    function getResponse(msg) {
+        const m = msg.toLowerCase();
+        if (m.includes('event')) return "📅 Check our Events page for all upcoming events!";
+        if (m.includes('register')) return "📝 Click 'Student Portal' → 'Register' to create an account.";
+        if (m.includes('login')) return "🔐 Students: Student Portal dropdown. Admins: Admin Login button.";
+        if (m.includes('hello') || m.includes('hi')) return "👋 Hello! Welcome to Campus Events!";
+        return "💡 Ask me about events, registration, or login!";
+    }
+
+    function addMessage(text, sender) {
+        const container = document.getElementById('chatbotMessages');
+        const div = document.createElement('div');
+        div.className = `message ${sender}-message`;
+        div.innerHTML = `<div class="message-bubble">${text}</div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+</script>
+</body>
+</html>
