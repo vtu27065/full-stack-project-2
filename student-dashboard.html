@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Campus Event Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+<!-- Simple Navbar -->
+<nav class="bg-gradient-to-r from-green-500 to-blue-500 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <div class="text-white text-xl font-bold">
+                Student Portal
+            </div>
+            <div class="flex space-x-4">
+                <a href="/students/dashboard" class="text-white hover:text-gray-200">Dashboard</a>
+                <a href="/events" class="text-white hover:text-gray-200">Browse Events</a>
+                <a href="/students/logout" class="bg-white text-green-600 px-4 py-1 rounded hover:bg-gray-100">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Welcome Banner -->
+    <div class="bg-gradient-to-r from-green-500 to-blue-500 rounded-lg shadow-lg p-6 mb-8 text-white">
+        <h1 class="text-2xl font-bold">Welcome, <span th:text="${student != null ? student.name : 'Student'}">Student</span>!</h1>
+        <p>Student ID: <span th:text="${student != null ? student.studentId : 'N/A'}">12345</span> | Department: <span th:text="${student != null ? student.department : 'N/A'}">CS</span></p>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="bg-green-100 text-green-700 p-3 rounded mb-4" th:text="${success}"></div>
+    <div th:if="${error}" class="bg-red-100 text-red-700 p-3 rounded mb-4" th:text="${error}"></div>
+
+    <!-- My Registered Events -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-4">My Registered Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="reg : ${myRegistrations}" class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm" th:text="${reg.event.eventType}">Type</span>
+                    <span class="text-sm text-green-600" th:text="${reg.status}">REGISTERED</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2" th:text="${reg.event.name}">Event Name</h3>
+                <p class="text-gray-600 mb-2" th:text="${reg.event.description}">Description</p>
+                <p class="text-gray-600 mb-4" th:text="'Location: ' + ${reg.event.location}">Location</p>
+                <form th:action="@{/students/cancel-registration/{id}(id=${reg.id})}" method="post">
+                    <button type="submit" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
+                            onclick="return confirm('Cancel registration?')">
+                        Cancel Registration
+                    </button>
+                </form>
+            </div>
+            <div th:if="${myRegistrations.empty}" class="col-span-full text-center py-8 bg-white rounded-lg">
+                <p class="text-gray-500">You haven't registered for any events yet.</p>
+                <a href="/events" class="inline-block mt-4 text-blue-600 hover:text-blue-800">Browse Events →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Events -->
+    <div>
+        <h2 class="text-2xl font-bold mb-4">Available Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="event : ${upcomingEvents}" class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm" th:text="${event.eventType}">Type</span>
+                    <span class="text-sm text-gray-500" th:text="${event.currentRegistrations} + ' registered'">0 registered</span>
+                </div>
+                <h3 class="text-xl font-bold mb-2" th:text="${event.name}">Event Name</h3>
+                <p class="text-gray-600 mb-2" th:text="${event.description}">Description</p>
+                <p class="text-gray-600 mb-4" th:text="'Location: ' + ${event.location}">Location</p>
+                <form th:action="@{/students/register-event/{id}(id=${event.id})}" method="post">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        Register Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+        <p>&copy; 2024 Campus Event Management System</p>
+    </div>
+    <div th:replace="fragments/footer :: footer"></div>
+</footer>
+
+</body>
+</html>
